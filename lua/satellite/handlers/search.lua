@@ -126,7 +126,7 @@ function handler.init()
   })
 end
 
-local SYMBOLS = {'⠂', '⠅', '⠇', '⠗', '⠟', '⠿'}
+local SYMBOLS = { "━", "🬋", "🬋", "🬰", "🬰", "█" }
 
 ---@class SearchMark
 ---@field count integer
