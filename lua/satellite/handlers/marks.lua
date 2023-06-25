@@ -1,18 +1,25 @@
-local util = require'satellite.util'
-local view = require'satellite.view'
+local util = require 'satellite.util'
+local view = require 'satellite.view'
 
-local highlight = 'Normal'
+local highlight = 'MarkSV'
 
 local api = vim.api
 
-require'satellite.autocmd.mark'
+require 'satellite.autocmd.mark'
 
 ---@type Handler
 local handler = {
   name = 'marks',
 }
 
-local BUILTIN_MARKS = { "'.", "'^", "''", "'\"", "'<", "'>", "'[", "']" }
+local function setup_hl()
+  api.nvim_set_hl(0, highlight, {
+    default = true,
+    fg = api.nvim_get_hl_by_name('Normal', true).foreground,
+  })
+end
+
+local BUILTIN_MARKS = { "'.", "'^", "''", '\'"', "'<", "'>", "'[", "']" }
 
 local config = {}
 
@@ -27,17 +34,23 @@ local function mark_is_builtin(m)
   return false
 end
 
-function handler.init(config0)
+function handler.init(config0, update)
   config = config0
 
   local group = api.nvim_create_augroup('satellite_marks', {})
 
+  api.nvim_create_autocmd('ColorScheme', {
+    group = group,
+    callback = setup_hl,
+  })
+
+  setup_hl()
+
   api.nvim_create_autocmd('User', {
     group = group,
     pattern = 'Mark',
-    callback = vim.schedule_wrap(view.refresh_bars)
+    callback = vim.schedule_wrap(update),
   })
-
 end
 
 ---@param marks SatelliteMark[]
@@ -45,10 +58,10 @@ end
 ---@param winid integer
 local function add_mark_to_bar(marks, mark, winid)
   local lnum = mark.pos[2]
-  local pos = util.row_to_barpos(winid, lnum-1)
+  local pos = util.row_to_barpos(winid, lnum - 1)
 
   if config and config.show_builtins or not mark_is_builtin(mark.mark) then
-    marks[#marks+1] = {
+    marks[#marks + 1] = {
       pos = pos,
       highlight = highlight,
       -- first char of mark name is a single quote

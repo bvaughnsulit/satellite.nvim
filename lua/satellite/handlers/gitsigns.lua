@@ -1,6 +1,6 @@
 local api = vim.api
 
-local util = require'satellite.util'
+local util = require 'satellite.util'
 
 ---@type Handler
 local handler = {
@@ -9,7 +9,7 @@ local handler = {
 
 local config = {}
 
-function handler.init(config0)
+function handler.setup(config0, update)
   config = config0
 
   local group = api.nvim_create_augroup('satellite_gitsigns', {})
@@ -17,9 +17,7 @@ function handler.init(config0)
   api.nvim_create_autocmd('User', {
     pattern = 'GitSignsUpdate',
     group = group,
-    callback = function()
-      require('satellite.view').refresh_bars()
-    end
+    callback = update,
   })
 end
 
@@ -31,25 +29,25 @@ function handler.update(bufnr, winid)
   local marks = {} ---@type SatelliteMark[]
 
   ---@type {type:string, added:{start: integer, count: integer}}[]
-  local hunks = require'gitsigns'.get_hunks(bufnr)
+  local hunks = require 'gitsigns'.get_hunks(bufnr)
 
   for _, hunk in ipairs(hunks or {}) do
-    for i = hunk.added.start, hunk.added.start+ math.max(0, hunk.added.count - 1) do
-      local hl = hunk.type == 'add'    and 'GitSignsAdd' or
-                 hunk.type == 'delete' and 'GitSignsDelete' or
-                                           'GitSignsChange'
+    for i = hunk.added.start, hunk.added.start + math.max(0, hunk.added.count - 1) do
+      local hl = hunk.type == 'add' and 'GitSignsAdd'
+        or hunk.type == 'delete' and 'GitSignsDelete'
+        or 'GitSignsChange'
       local lnum = math.max(1, i)
-      local pos = util.row_to_barpos(winid, lnum-1)
+      local pos = util.row_to_barpos(winid, lnum - 1)
 
       ---@type string
       local symbol = config.signs[hunk.type]
-      if not symbol or type(symbol) ~= "string" then
+      if not symbol or type(symbol) ~= 'string' then
         symbol = hunk.type == 'delete' and '-' or '│'
       end
 
       marks[pos] = {
         symbol = symbol,
-        highlight = hl
+        highlight = hl,
       }
     end
   end
@@ -57,7 +55,7 @@ function handler.update(bufnr, winid)
   local ret = {} ---@type SatelliteMark[]
 
   for pos, mark in pairs(marks) do
-    ret[#ret+1] = {
+    ret[#ret + 1] = {
       pos = pos,
       highlight = mark.highlight,
       symbol = mark.symbol,
