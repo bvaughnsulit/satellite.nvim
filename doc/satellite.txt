@@ -9,18 +9,18 @@ License:  MIT license
 REQUIREMENTS                                          *satellite-requirements*
 
 * Scrollbar mouse dragging requires mouse support (see |'mouse'|) and
-  `nvim>=0.7`.
+  `nvim>=0.9`.
 
 ==============================================================================
 USAGE                                                        *satellite-usage*
 
 For basic setup with all batteries included:
->
+>lua
     require('satellite').setup()
 
 Configuration can be passed to the setup function. Here is an example with most
 of the default settings:
->
+>lua
     require('satellite').setup {
       current_only = false,
       winblend = 50,
@@ -28,6 +28,9 @@ of the default settings:
       excluded_filetypes = {},
       width = 2,
       handlers = {
+        cursor = {
+          enable = true,
+        },
         search = {
           enable = true,
         },
@@ -103,7 +106,7 @@ Name         Default   Description
 `ScrollView`   `Visual`    Color for the scrollbar
 
 The highlight groups can be customized. Example:
- >
+ >vim
     " Link ScrollView highlight to Pmenu highlight
     highlight link ScrollView Pmenu
 
@@ -130,10 +133,6 @@ ISSUES                                                      *satellite-issues*
   non-current window. This is because the |WinScrolled| event only corresponds
   to the current window. The scrollbars can be refreshed with
   |:SatelliteRefresh|, scrolling, or by changing the current window.
-
-* Scrollbars become out-of-sync after fold commands. Because there are no
-  |autocmd-events| for folding, the plugin is unable to refresh the
-  scrollbars.
 
 ============================================================================
  vim:tw=78:ts=4:ft=help:norl:
